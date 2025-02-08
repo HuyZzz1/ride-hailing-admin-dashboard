@@ -22,7 +22,13 @@ const Header = () => {
   };
 
   return (
-    <div className='flex items-center justify-between px-4 w-full h-full'>
+    <div
+      className='flex items-center justify-between px-4 w-full h-full'
+      style={{
+        boxShadow:
+          'rgba(0, 0, 0, 0.03) 0px 1px 2px 0px, rgba(0, 0, 0, 0.02) 0px 1px 6px -1px, rgba(0, 0, 0, 0.02) 0px 2px 4px 0px',
+      }}
+    >
       <h1 className='text-violet-500 font-bold uppercase text-xl'>Moovtek</h1>
       <StyledDropDownAccount id='styled-dropdown'>
         <Dropdown

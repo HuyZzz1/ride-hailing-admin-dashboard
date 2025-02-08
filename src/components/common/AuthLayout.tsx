@@ -25,7 +25,7 @@ const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           router.push(PAGE_ROUTES.BOOKING);
         }
 
-        setUser({ ...data, isLoading: false });
+        setUser({ ...data.data, isLoading: false });
       },
 
       onError: () => {

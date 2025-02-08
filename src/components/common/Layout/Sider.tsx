@@ -9,7 +9,7 @@ import { Menu, Layout } from 'antd';
 import Link from 'next/link';
 import _compact from 'lodash/compact';
 import { PAGE_ROUTES } from '@/utils/routes';
-import { useWindowWidth } from '@/service/hook';
+import { useWindowWidth } from '@/service/hooks/useWindowWidth';
 
 const { Sider } = Layout;
 

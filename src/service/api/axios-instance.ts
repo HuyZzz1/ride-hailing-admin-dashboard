@@ -21,8 +21,8 @@ axiosInstance.interceptors.request.use(async (config) => {
 
 // Xử lý lỗi API
 axiosInstance.interceptors.response.use(
-  (response) => response.data,
-  (error) => Promise.reject(error.response?.data || error.message)
+  (response) => response,
+  (error) => Promise.reject(error.response || error.message)
 );
 
 export default axiosInstance;
