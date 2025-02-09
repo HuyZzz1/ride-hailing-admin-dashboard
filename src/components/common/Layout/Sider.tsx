@@ -71,7 +71,7 @@ const CustomSider = () => {
   }, [router.pathname]);
 
   useEffect(() => {
-    if (Number(widthScreen) < 576) {
+    if (Number(widthScreen) < 768) {
       setCollapsed(true);
     }
   }, [widthScreen]);

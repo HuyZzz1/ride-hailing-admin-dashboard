@@ -1,9 +1,25 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { checkAuth } from '../../../service/auth';
+import { divers } from '@/utils/mockData';
+import { DriverStatus } from '@/utils/enum';
 
-const drivers = [
-  { id: '1', name: 'Trần Văn D', vehicle: 'Toyota', rating: 4.9 },
-];
+export type PaginationResponse<T> = {
+  docs: T[];
+  totalDocs: number;
+  limit: number;
+  page: number;
+  totalPages: number;
+};
+
+export type PaginationRequest = {
+  filter?: {
+    status?: DriverStatus;
+  };
+  search?: string;
+  sort?: { field: string; order: 'asc' | 'desc' };
+  limit?: number;
+  page?: number;
+};
 
 export default async function handler(
   req: NextApiRequest,
@@ -13,22 +29,43 @@ export default async function handler(
   if (!token) return;
 
   if (req.method === 'POST') {
-    const { search, page = 1, limit = 5 } = req.body;
-    let filteredDrivers = [...drivers];
+    const {
+      search = '',
+      filter = {},
+      page,
+      limit,
+    }: PaginationRequest = req.body;
+
+    const currentPage = page ?? 1;
+    const currentLimit = limit ?? 18;
+
+    let filteredDivers = [...divers];
 
     if (search) {
-      filteredDrivers = filteredDrivers.filter((d) =>
-        d.name.toLowerCase().includes(search.toLowerCase())
+      const searchLower = search.toLowerCase();
+      filteredDivers = filteredDivers.filter((b) =>
+        b.name.toLowerCase().includes(searchLower)
       );
     }
 
-    const total = filteredDrivers.length;
-    const paginatedDrivers = filteredDrivers.slice(
-      (page - 1) * limit,
-      page * limit
+    if (filter.status) {
+      filteredDivers = filteredDivers.filter((b) => b.status === filter.status);
+    }
+
+    const totalDocs = filteredDivers.length;
+    const totalPages = Math.ceil(totalDocs / currentLimit);
+    const paginatedBookings = filteredDivers.slice(
+      (currentPage - 1) * currentLimit,
+      currentPage * currentLimit
     );
 
-    return res.status(200).json({ total, page, limit, data: paginatedDrivers });
+    return res.status(200).json({
+      docs: paginatedBookings,
+      totalDocs,
+      totalPages,
+      limit: currentLimit,
+      page: currentPage,
+    } as PaginationResponse<(typeof divers)[0]>);
   }
 
   return res.status(405).json({ message: 'Method Not Allowed' });

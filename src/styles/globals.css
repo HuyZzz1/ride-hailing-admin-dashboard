@@ -33,3 +33,9 @@ html {
     font-size: 12px;
   }
 }
+
+.row-cursor {
+  .ant-table-cell {
+    cursor: pointer;
+  }
+}

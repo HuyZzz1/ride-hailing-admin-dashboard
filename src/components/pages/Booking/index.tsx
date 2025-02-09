@@ -44,11 +44,25 @@ const Filter = () => {
     });
   }, 1000);
 
+  useEffect(() => {
+    form.setFieldsValue({
+      search: router.query?.search || '',
+      status: router.query?.status || null,
+      dateRange:
+        router.query?.startDate && router.query?.endDate
+          ? [
+              dayjs(String(router.query?.startDate), 'DD/MM/YYYY'),
+              dayjs(String(router.query?.endDate), 'DD/MM/YYYY'),
+            ]
+          : [],
+    });
+  }, [router.query]);
+
   return (
     <div className='w-full'>
       <Form layout='horizontal' form={form} className='w-full'>
         <Row gutter={[12, 12]}>
-          <Col span={6}>
+          <Col xs={24} md={12} lg={6}>
             <Form.Item name='search' style={{ margin: 0 }}>
               <Input
                 placeholder='Enter ID, Customer Name, Driver Name to search...'
@@ -57,7 +71,7 @@ const Filter = () => {
               />
             </Form.Item>
           </Col>
-          <Col span={6}>
+          <Col xs={24} md={12} lg={6}>
             <Form.Item name='status' style={{ margin: 0 }}>
               <Select
                 allowClear
@@ -93,8 +107,8 @@ const Filter = () => {
               />
             </Form.Item>
           </Col>
-          <Col span={6}>
-            <Form.Item name='dateRange'>
+          <Col xs={24} md={12} lg={6}>
+            <Form.Item name='dateRange' style={{ margin: 0 }}>
               <RangePicker
                 allowClear={true}
                 format={'DD/MM/YYYY'}
@@ -112,8 +126,8 @@ const Filter = () => {
               />
             </Form.Item>
           </Col>
-          <Col span={6}>
-            <Form.Item name='driver' style={{ margin: 0 }}>
+          <Col xs={24} md={12} lg={6}>
+            <Form.Item name='driver'>
               <Select
                 allowClear
                 className='w-full'
@@ -157,7 +171,7 @@ const Filter = () => {
 const Booking = () => {
   const router = useRouter();
   const query = useRef<PaginationRequest>({ ...DEFAULT_FILTER });
-  const { mutate } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: listBookingsQuery,
   });
   const [data, setData] =
@@ -173,13 +187,13 @@ const Booking = () => {
 
     if (status) query.current.filter = { ...query.current.filter, status };
 
-    query.current.filter =
-      startDate && endDate
-        ? {
-            startDate: dayjs(startDate, 'DD/MM/YYYY').startOf('days').toDate(),
-            endDate: dayjs(endDate, 'DD/MM/YYYY').endOf('days').toDate(),
-          }
-        : {};
+    if (startDate && endDate)
+      query.current.filter = {
+        ...query.current.filter,
+        startDate: dayjs(startDate, 'DD/MM/YYYY').startOf('days').toDate(),
+        endDate: dayjs(endDate, 'DD/MM/YYYY').endOf('days').toDate(),
+      };
+
     mutate({ ...query.current } as any, {
       onSuccess: ({ data }) => {
         setData(data);
@@ -190,7 +204,7 @@ const Booking = () => {
     });
   };
 
-  const columns: ColumnsType = useMemo(() => {
+  const columns: ColumnsType<BookingCollection> = useMemo(() => {
     return [
       {
         title: 'Booking ID',
@@ -308,6 +322,7 @@ const Booking = () => {
             <Button type='primary'>Create</Button>
           </div>
           <Table
+            isLoading={isPending}
             columns={columns}
             dataSource={data.docs}
             onChange={onChange}

@@ -46,7 +46,6 @@ export default async function handler(
 
     let filteredBookings = [...bookings];
 
-    // **🔍 Search by customer name**
     if (search) {
       const searchLower = search.toLowerCase();
       filteredBookings = filteredBookings.filter(
@@ -57,20 +56,18 @@ export default async function handler(
       );
     }
 
-    // **📌 Filter by status**
     if (filter.status) {
       filteredBookings = filteredBookings.filter(
         (b) => b.status === filter.status
       );
     }
 
-    if (filter.driver) {
-      filteredBookings = filteredBookings.filter(
-        (b) => b.driver === filter.driver
-      );
-    }
+    // if (filter.driver) {
+    //   filteredBookings = filteredBookings.filter(
+    //     (b) => b.driver === filter.driver
+    //   );
+    // }
 
-    // **🕒 Filter by Date Range (`startDate` - `endDate`)**
     if (filter.startDate && filter.endDate) {
       const start = dayjs(filter.startDate).startOf('day').toDate();
       const end = dayjs(filter.endDate).endOf('day').toDate();
@@ -81,19 +78,17 @@ export default async function handler(
       });
     }
 
-    // **📅 Sort by time (default: DESC - latest first)**
     filteredBookings.sort((a, b) => {
       const dateA = dayjs(a.createdAt);
       const dateB = dayjs(b.createdAt);
 
       if (sort?.field === 'createdAt' && sort.order === 'asc') {
-        return dateA.isBefore(dateB) ? -1 : 1; // 🆙 Cũ -> Mới
+        return dateA.isBefore(dateB) ? -1 : 1;
       }
 
-      return dateA.isBefore(dateB) ? 1 : -1; // 🔽 Mới -> Cũ (default)
+      return dateA.isBefore(dateB) ? 1 : -1;
     });
 
-    // **🔢 Pagination calculations**
     const totalDocs = filteredBookings.length;
     const totalPages = Math.ceil(totalDocs / currentLimit);
     const paginatedBookings = filteredBookings.slice(
@@ -101,7 +96,6 @@ export default async function handler(
       currentPage * currentLimit
     );
 
-    // **📊 Response with pagination structure**
     return res.status(200).json({
       docs: paginatedBookings,
       totalDocs,

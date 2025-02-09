@@ -5,4 +5,7 @@ export const API_ENDPOINTS = {
   BOOKINGS: {
     LIST: '/bookings',
   },
+  DRIVERS: {
+    LIST: '/drivers',
+  },
 };
