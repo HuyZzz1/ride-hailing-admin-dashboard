@@ -7,7 +7,7 @@ import {
 import { useForm } from 'antd/es/form/Form';
 import { fieldValidate } from '@/utils/helper';
 import { Button, Form, Input, Modal, Select } from 'antd';
-import { RideStatus } from '@/utils/enum';
+import { RideStatus, Role } from '@/utils/enum';
 import { driversRecoil } from '@/service/recoil/drivers';
 import { useRecoilValue } from 'recoil';
 import { useMutation } from '@tanstack/react-query';
@@ -17,6 +17,7 @@ import {
 } from '@/components/common/Message';
 import { BookingCollection } from '@/service/collection';
 import { editBookingQuery } from '@/service/api/bookings';
+import { userRecoil } from '@/service/recoil/user';
 
 const Edit: ForwardRefRenderFunction<
   any,
@@ -34,6 +35,7 @@ const Edit: ForwardRefRenderFunction<
     mutationFn: editBookingQuery,
   });
   const drivers = useRecoilValue(driversRecoil);
+  const user = useRecoilValue(userRecoil);
 
   const onFinish = (values: {
     status: RideStatus;
@@ -113,21 +115,30 @@ const Edit: ForwardRefRenderFunction<
           rules={[fieldValidate.required]}
           label='Customer Name'
         >
-          <Input placeholder='Customer Name' />
+          <Input
+            placeholder='Customer Name'
+            disabled={user.role == Role.STAFF}
+          />
         </Form.Item>
         <Form.Item
           name='formAddress'
           rules={[fieldValidate.required]}
           label='Pickup Location'
         >
-          <Input placeholder='Pickup Location' />
+          <Input
+            placeholder='Pickup Location'
+            disabled={user.role == Role.STAFF}
+          />
         </Form.Item>
         <Form.Item
           name='toAddress'
           rules={[fieldValidate.required]}
           label='Drop-off Location'
         >
-          <Input placeholder='Drop-off Location' />
+          <Input
+            placeholder='Drop-off Location'
+            disabled={user.role == Role.STAFF}
+          />
         </Form.Item>
         <Form.Item
           name='driverId'
@@ -142,6 +153,7 @@ const Edit: ForwardRefRenderFunction<
               label: item?.name,
               value: item?.id,
             }))}
+            disabled={user.role == Role.STAFF}
           />
         </Form.Item>
 

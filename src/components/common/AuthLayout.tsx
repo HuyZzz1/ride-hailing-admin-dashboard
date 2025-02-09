@@ -15,7 +15,6 @@ import LoaderComponent from './LoaderComponent';
 import { driversRecoil } from '@/service/recoil/drivers';
 import { listDriversQuery } from '@/service/api/drivers';
 import { DEFAULT_FILTER } from '@/utils/constant';
-import { ShowErrorMessage } from './Message';
 import { DriverStatus } from '@/utils/enum';
 import { DriverCollection } from '@/service/collection';
 
@@ -63,9 +62,6 @@ const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             }))
           );
         },
-        onError: (error: any) => {
-          ShowErrorMessage(error?.response);
-        },
       }
     );
   };
@@ -73,14 +69,22 @@ const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   useEffect(() => {
     if (!UN_FETCH_PROFILE_ROUTES.includes(router.pathname)) {
       onGetProfile();
-      onGetDrivers();
     } else {
       setUser((prev) => ({ ...prev, isLoading: false }));
     }
   }, []);
 
   useEffect(() => {
-    if (user.refreshUser) onGetProfile();
+    if (!UN_AUTH_ROUTES.includes(router.pathname)) {
+      onGetDrivers();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (user.refreshUser) {
+      onGetProfile();
+      onGetDrivers();
+    }
   }, [user.refreshUser]);
 
   if (user.isLoading) {

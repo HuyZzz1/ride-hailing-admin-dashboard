@@ -31,9 +31,15 @@ import { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { DeleteOutlined, EditOutlined, InfoOutlined } from '@ant-design/icons';
+import {
+  DeleteOutlined,
+  DownloadOutlined,
+  EditOutlined,
+  InfoOutlined,
+  PlusOutlined,
+} from '@ant-design/icons';
 import _debounce from 'lodash/debounce';
-import { RideStatus } from '@/utils/enum';
+import { RideStatus, Role } from '@/utils/enum';
 import usePagination from '@/service/hooks/usePagination';
 import { useRecoilValue } from 'recoil';
 import { driversRecoil } from '@/service/recoil/drivers';
@@ -42,6 +48,8 @@ import Edit from './Modal/Edit';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import ViewDetails from './Modal/ViewDetails';
 import { TableRowSelection } from 'antd/es/table/interface';
+import { userRecoil } from '@/service/recoil/user';
+import * as XLSX from 'xlsx';
 
 const { RangePicker } = DatePicker;
 
@@ -83,7 +91,7 @@ const Filter = () => {
           <Col xs={24} md={12} lg={6}>
             <Form.Item name='search' style={{ margin: 0 }}>
               <Input
-                placeholder='Enter ID, Customer Name, Driver Name to search...'
+                placeholder='Enter ID, Customer Name to search...'
                 onChange={onChangeKeyWord}
                 allowClear
               />
@@ -186,6 +194,11 @@ const Booking = () => {
   const viewDetailsRef = useRef<any>(null);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
   const hasSelected = selectedRowKeys.length > 0;
+  const user = useRecoilValue(userRecoil);
+  const queryExport = useRef<PaginationRequest>({
+    ...DEFAULT_FILTER,
+    limit: 9999,
+  });
 
   const { mutate: deleteMutate } = useMutation({
     mutationFn: deleteBookingQuery,
@@ -332,20 +345,22 @@ const Booking = () => {
                   <EditOutlined />
                 </Button>
               </Tooltip>
-              <Tooltip title='Delete'>
-                <Button
-                  size='small'
-                  type='primary'
-                  danger
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onDelete(item?.id);
-                  }}
-                >
-                  <DeleteOutlined />
-                </Button>
-              </Tooltip>
+              {user?.role === Role.ADMIN && (
+                <Tooltip title='Delete'>
+                  <Button
+                    size='small'
+                    type='primary'
+                    danger
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onDelete(item?.id);
+                    }}
+                  >
+                    <DeleteOutlined />
+                  </Button>
+                </Tooltip>
+              )}
             </Space>
           );
         },
@@ -387,6 +402,65 @@ const Booking = () => {
     });
   };
 
+  const onExport = () => {
+    const { page, search, status, driverId, startDate, endDate } =
+      router.query as any;
+
+    queryExport.current.filter = {};
+    queryExport.current.page = page ? Number(page) : 1;
+    queryExport.current.search = search;
+
+    if (status)
+      queryExport.current.filter = { ...queryExport.current.filter, status };
+    if (driverId)
+      queryExport.current.filter = { ...queryExport.current.filter, driverId };
+
+    if (startDate && endDate)
+      queryExport.current.filter = {
+        ...queryExport.current.filter,
+        startDate: dayjs(startDate, 'DD/MM/YYYY').startOf('days').toDate(),
+        endDate: dayjs(endDate, 'DD/MM/YYYY').endOf('days').toDate(),
+      };
+
+    mutate({ ...queryExport.current } as any, {
+      onSuccess: ({ data }) => {
+        const worksheet = XLSX.utils.json_to_sheet(
+          data?.docs?.map((item: BookingCollection) => {
+            console.log('item', item);
+            let status = '';
+
+            if (item?.status === RideStatus.PENDING) {
+              status = 'Pending';
+            } else if (item?.status === RideStatus.COMPLETED) {
+              status = 'Completed';
+            } else if (item?.status === RideStatus.IN_PROGRESS) {
+              status = 'In Progress';
+            } else {
+              status = 'Cancelled';
+            }
+
+            return {
+              'Booking ID': item?.id,
+              'Customer Name': item?.customer,
+              'Pickup Location': item?.formAddress,
+              'Drop-off Location': item?.toAddress,
+              'Driver Name': item?.driver,
+              Status: status,
+              'Created At': dayjs(item.createdAt).format('DD-MM-YYYY HH:mm'),
+            };
+          })
+        );
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+        XLSX.writeFile(workbook, `Booking Management.xlsx`);
+      },
+      onError: (error: any) => {
+        ShowErrorMessage(error.statusText);
+      },
+    });
+  };
+
   useEffect(() => {
     fetchData();
   }, [router.query]);
@@ -409,20 +483,48 @@ const Booking = () => {
         <div className='p-3'>
           <Card>
             <Filter />
-            <div className='flex items-center justify-between mb-5'>
-              <Button
-                type='primary'
-                danger
-                onClick={() => onDeleteMultiple(selectedRowKeys as string[])}
-                disabled={!hasSelected}
-                loading={isPendingDeleteMultiple}
-              >
-                Delete Multiple
-              </Button>
-              <Button type='primary' onClick={() => createRef.current.open()}>
-                Create
-              </Button>
-            </div>
+            {user.role === Role.ADMIN && (
+              <div className='flex items-center justify-between mb-5 sm:flex-col-reverse sm:items-start sm:gap-3'>
+                <Button
+                  type='primary'
+                  danger
+                  onClick={() => onDeleteMultiple(selectedRowKeys as string[])}
+                  disabled={!hasSelected}
+                  loading={isPendingDeleteMultiple}
+                  className='sm:w-full'
+                >
+                  <div className='flex items-center justify-center gap-2.5'>
+                    <DeleteOutlined style={{ fontSize: 16 }} />
+                    Delete Multiple
+                  </div>
+                </Button>
+                <div className='flex items-center gap-2.5 sm:flex-col sm:items-start sm:gap-2 sm:w-full'>
+                  <Button
+                    type='primary'
+                    onClick={() => createRef.current.open()}
+                    className='sm:w-full'
+                  >
+                    <div className='flex items-center justify-center gap-2.5'>
+                      <PlusOutlined style={{ color: 'white', fontSize: 16 }} />
+                      Create
+                    </div>
+                  </Button>
+                  <Button
+                    type='primary'
+                    onClick={onExport}
+                    className='sm:w-full'
+                  >
+                    <div className='flex items-center justify-center gap-2.5'>
+                      <DownloadOutlined
+                        style={{ color: 'white', fontSize: 16 }}
+                      />
+                      Export
+                    </div>
+                  </Button>
+                </div>
+              </div>
+            )}
+
             <Table
               isLoading={isPending}
               columns={columns}
@@ -434,7 +536,7 @@ const Booking = () => {
                 total: data.totalDocs,
                 current: data.page,
               }}
-              rowSelection={rowSelection}
+              {...(user.role === Role.ADMIN && { rowSelection: rowSelection })}
             />
           </Card>
         </div>

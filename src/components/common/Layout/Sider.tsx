@@ -10,6 +10,9 @@ import Link from 'next/link';
 import _compact from 'lodash/compact';
 import { PAGE_ROUTES } from '@/utils/routes';
 import { useWindowWidth } from '@/service/hooks/useWindowWidth';
+import { useRecoilValue } from 'recoil';
+import { userRecoil } from '@/service/recoil/user';
+import { Role } from '@/utils/enum';
 
 const { Sider } = Layout;
 
@@ -24,6 +27,7 @@ const CustomSider = () => {
   const widthScreen = useWindowWidth();
   const [activeKey, setActiveKey] = useState(router.pathname);
   const [collapsed, setCollapsed] = useState(false);
+  const user = useRecoilValue(userRecoil);
 
   const menus = _compact([
     {
@@ -38,7 +42,7 @@ const CustomSider = () => {
       ),
       label: <Link href={PAGE_ROUTES.BOOKING}>Booking Management</Link>,
     },
-    {
+    user.role === Role.ADMIN && {
       key: TAB_KEY.DRIVER,
       groups: [PAGE_ROUTES.DRIVER],
       icon: (
@@ -50,7 +54,7 @@ const CustomSider = () => {
       ),
       label: <Link href={PAGE_ROUTES.DRIVER}>Driver Management</Link>,
     },
-    {
+    user.role === Role.ADMIN && {
       key: TAB_KEY.ACTIVITY_LOG,
       groups: [PAGE_ROUTES.ACTIVITY_LOG],
       icon: (

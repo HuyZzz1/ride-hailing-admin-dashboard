@@ -88,13 +88,11 @@ const defaultDrivers = [
   },
 ];
 
-// Load dữ liệu bookings
 export async function loadBookings() {
   const bookings = await redis.get('bookings');
   return Array.isArray(bookings) ? bookings : [];
 }
 
-// Lưu dữ liệu bookings
 export async function saveBookings(bookings: any[]) {
   await redis.set('bookings', bookings);
 }

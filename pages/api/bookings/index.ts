@@ -54,8 +54,7 @@ export default async function handler(
         filteredBookings = filteredBookings.filter(
           (b: BookingCollection) =>
             b.id.toLowerCase().includes(searchLower) ||
-            b.customer.toLowerCase().includes(searchLower) ||
-            b?.driver?.toLowerCase().includes(searchLower)
+            b.customer.toLowerCase().includes(searchLower)
         );
       }
 
