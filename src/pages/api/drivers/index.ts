@@ -40,7 +40,7 @@ export default async function handler(
     const currentPage = page ?? 1;
     const currentLimit = limit ?? 18;
 
-    let filteredDrivers = await loadDrivers();
+    let filteredDrivers = (await loadDrivers()) as any;
 
     if (search) {
       const searchLower = search.toLowerCase();

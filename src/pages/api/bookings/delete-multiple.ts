@@ -23,7 +23,7 @@ export default async function handler(
     });
   }
 
-  let bookings = loadBookings();
+  let bookings = await loadBookings();
   const initialLength = bookings.length;
 
   bookings = bookings.filter((b: BookingCollection) => !ids.includes(b.id));
@@ -34,7 +34,7 @@ export default async function handler(
       .json({ message: 'No matching bookings found to delete' });
   }
 
-  saveBookings(bookings);
+  await saveBookings(bookings);
 
   ids.forEach((id) => {
     logAudit(

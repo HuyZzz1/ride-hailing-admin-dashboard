@@ -1,8 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { checkAuth } from '../../../service/auth';
 import dayjs from 'dayjs';
-import { loadAuditTrail } from '@/utils/db';
 import { AuditTrailCollection } from '@/service/collection';
+import { loadAuditTrail } from '@/utils/db';
 
 export type PaginationResponse<T> = {
   docs: T[];

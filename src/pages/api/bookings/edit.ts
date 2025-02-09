@@ -14,7 +14,7 @@ export default async function handler(
   if (!token) return;
 
   if (req.method === 'PUT') {
-    const bookings = loadBookings();
+    const bookings = await loadBookings();
     const { id, customer, formAddress, toAddress, driverId, status } = req.body;
 
     const bookingIndex = bookings.findIndex(
@@ -32,7 +32,7 @@ export default async function handler(
       driverId,
       status,
     };
-    saveBookings(bookings);
+    await saveBookings(bookings);
 
     logAudit(
       ActionAudit.UPDATE,

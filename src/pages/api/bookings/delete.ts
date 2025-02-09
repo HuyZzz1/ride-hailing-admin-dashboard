@@ -17,7 +17,7 @@ export default async function handler(
     return res.status(405).json({ message: 'Method Not Allowed' });
   }
 
-  const bookings = loadBookings();
+  const bookings = await loadBookings();
 
   const { id } = req.body;
 
@@ -26,7 +26,7 @@ export default async function handler(
     return res.status(404).json({ message: 'Booking not found' });
 
   bookings.splice(index, 1);
-  saveBookings(bookings);
+  await saveBookings(bookings);
 
   logAudit(
     ActionAudit.DELETE,

@@ -47,7 +47,7 @@ export default async function handler(
       const currentLimit = limit ?? 18;
 
       let filteredBookings = await loadBookings();
-      const diversData = await loadDrivers();
+      const diversData = (await loadDrivers()) as any;
 
       if (search) {
         const searchLower = search.toLowerCase();

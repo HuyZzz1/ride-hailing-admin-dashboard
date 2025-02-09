@@ -2,13 +2,13 @@ import { loadAuditTrail, saveAuditTrail } from '@/utils/db';
 import { ActionAudit } from '@/utils/enum';
 import { v4 as uuidv4 } from 'uuid';
 
-export function logAudit(
+export async function logAudit(
   action: ActionAudit,
   bookingId: string,
   user: string,
   details: string
 ) {
-  const auditTrail = loadAuditTrail();
+  const auditTrail = await loadAuditTrail();
   auditTrail.push({
     id: uuidv4().split('-')[0],
     action,
@@ -17,5 +17,5 @@ export function logAudit(
     createdAt: new Date(),
     details,
   });
-  saveAuditTrail(auditTrail);
+  await saveAuditTrail(auditTrail);
 }

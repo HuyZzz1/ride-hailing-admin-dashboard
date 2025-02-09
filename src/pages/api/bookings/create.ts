@@ -13,7 +13,9 @@ export default async function handler(
   if (!token) return;
 
   if (req.method === 'POST') {
-    const bookings = loadBookings();
+    const bookings = await loadBookings();
+
+    console.log('bookings:', bookings);
 
     const { customer, formAddress, toAddress, driverId, status } = req.body;
 
@@ -32,7 +34,8 @@ export default async function handler(
     };
 
     bookings.push(newBooking);
-    saveBookings(bookings);
+    await saveBookings(bookings);
+    console.log('Booking saved successfully');
 
     logAudit(
       ActionAudit.CREATE,
