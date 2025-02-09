@@ -3,14 +3,6 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: false,
-  ...(process.env.NODE_ENV === 'production' && {
-    typescript: {
-      ignoreBuildErrors: true,
-    },
-    eslint: {
-      ignoreDuringBuilds: true,
-    },
-  }),
 
   transpilePackages: [
     'antd',
