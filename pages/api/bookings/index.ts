@@ -1,9 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { checkAuth } from '../../../service/auth';
 import dayjs from 'dayjs';
 import { RideStatus } from '@/utils/enum';
 import { loadBookings, loadDrivers } from '@/utils/db';
 import { BookingCollection, DriverCollection } from '@/service/collection';
+import { checkAuth } from '@/service/auth';
 
 export type PaginationResponse<T> = {
   docs: T[];

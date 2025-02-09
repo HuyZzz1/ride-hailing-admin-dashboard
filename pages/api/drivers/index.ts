@@ -1,8 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { checkAuth } from '../../../service/auth';
 import { DriverStatus } from '@/utils/enum';
 import { loadDrivers } from '@/utils/db';
 import { DriverCollection } from '@/service/collection';
+import { checkAuth } from '@/service/auth';
 
 export type PaginationResponse<T> = {
   docs: T[];

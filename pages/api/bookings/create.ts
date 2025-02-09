@@ -1,9 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { checkAuth } from '../../../service/auth';
 import { v4 as uuidv4 } from 'uuid';
 import { logAudit } from '@/service/auditTrail';
 import { ActionAudit } from '@/utils/enum';
 import { loadBookings, saveBookings } from '@/utils/db';
+import { checkAuth } from '@/service/auth';
 
 export default async function handler(
   req: NextApiRequest,
