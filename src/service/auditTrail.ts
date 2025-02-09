@@ -1,5 +1,5 @@
+import { loadAuditTrail, saveAuditTrail } from '@/utils/db';
 import { ActionAudit } from '@/utils/enum';
-import { auditTrail } from '@/utils/mockData';
 import { v4 as uuidv4 } from 'uuid';
 
 export function logAudit(
@@ -8,12 +8,14 @@ export function logAudit(
   user: string,
   details: string
 ) {
+  const auditTrail = loadAuditTrail();
   auditTrail.push({
-    id: uuidv4().replace(/-/g, '').substring(0, 10),
+    id: uuidv4().split('-')[0],
     action,
     bookingId,
     user,
     createdAt: new Date(),
     details,
   });
+  saveAuditTrail(auditTrail);
 }

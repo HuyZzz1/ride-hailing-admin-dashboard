@@ -32,7 +32,7 @@ export default async function handler(
     ActionAudit.DELETE,
     id,
     token?.name as string,
-    `Deleted booking ${id}`
+    `Deleted booking id: ${id}`
   );
 
   return res.status(200).json({ message: 'Booking deleted successfully' });

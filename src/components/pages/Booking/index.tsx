@@ -13,6 +13,7 @@ import { PaginationRequest, PaginationResponse } from '@/service/types';
 import { DEFAULT_FILTER, DEFAULT_RESPONSE } from '@/utils/constant';
 import { useMutation } from '@tanstack/react-query';
 import {
+  Affix,
   Button,
   Card,
   Col,
@@ -396,9 +397,15 @@ const Booking = () => {
       <Edit ref={editRef} fetchData={fetchData} />
       <ViewDetails ref={viewDetailsRef} />
       <div className='flex flex-col'>
-        <div className='w-full h-[60px] bg-white flex items-center px-5'>
-          <p className='text-lg font-medium'>Booking Management</p>
-        </div>
+        <Affix
+          offsetTop={0}
+          target={() => document.getElementById('main-layout')}
+        >
+          <div className='w-full h-[60px] bg-white flex items-center px-5'>
+            <p className='text-lg font-medium'>Booking Management</p>
+          </div>
+        </Affix>
+
         <div className='p-3'>
           <Card>
             <Filter />

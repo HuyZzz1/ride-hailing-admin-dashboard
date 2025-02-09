@@ -10,6 +10,6 @@ export const DEFAULT_FILTER = {
   filter: {},
   search: '',
   page: 1,
-  limit: 18,
+  limit: 16,
   sort: { field: 'createdAt', order: 'desc' },
 };

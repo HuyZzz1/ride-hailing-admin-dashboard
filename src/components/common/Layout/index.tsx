@@ -18,7 +18,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <CustomSider />
         <LayoutAntd.Content
           className='overflow-y-auto h-[calc(100vh-64px)]'
-          id='main-component-layout'
+          id='main-layout'
         >
           {children}
         </LayoutAntd.Content>

@@ -1,7 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { checkAuth } from '../../../service/auth';
-import { diversData } from '@/utils/mockData';
 import { DriverStatus } from '@/utils/enum';
+import { loadDrivers } from '@/utils/db';
+import { DriverCollection } from '@/service/collection';
 
 export type PaginationResponse<T> = {
   docs: T[];
@@ -39,33 +40,35 @@ export default async function handler(
     const currentPage = page ?? 1;
     const currentLimit = limit ?? 18;
 
-    let filteredDivers = [...diversData];
+    let filteredDrivers = await loadDrivers();
 
     if (search) {
       const searchLower = search.toLowerCase();
-      filteredDivers = filteredDivers.filter((b) =>
+      filteredDrivers = filteredDrivers.filter((b: DriverCollection) =>
         b.name.toLowerCase().includes(searchLower)
       );
     }
 
     if (filter.status) {
-      filteredDivers = filteredDivers.filter((b) => b.status === filter.status);
+      filteredDrivers = filteredDrivers.filter(
+        (b: DriverCollection) => b.status === filter.status
+      );
     }
 
-    const totalDocs = filteredDivers.length;
+    const totalDocs = filteredDrivers.length;
     const totalPages = Math.ceil(totalDocs / currentLimit);
-    const paginatedBookings = filteredDivers.slice(
+    const paginatedDrivers = filteredDrivers.slice(
       (currentPage - 1) * currentLimit,
       currentPage * currentLimit
     );
 
     return res.status(200).json({
-      docs: paginatedBookings,
+      docs: paginatedDrivers,
       totalDocs,
       totalPages,
       limit: currentLimit,
       page: currentPage,
-    } as PaginationResponse<(typeof diversData)[0]>);
+    });
   }
 
   return res.status(405).json({ message: 'Method Not Allowed' });

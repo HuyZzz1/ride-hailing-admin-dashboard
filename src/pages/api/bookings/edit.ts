@@ -38,7 +38,7 @@ export default async function handler(
       ActionAudit.UPDATE,
       id,
       token?.name as string,
-      `Updated booking ${id}`
+      `Updated booking id: ${id}`
     );
 
     return res.status(200).json({

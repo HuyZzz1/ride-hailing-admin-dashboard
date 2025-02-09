@@ -12,4 +12,7 @@ export const API_ENDPOINTS = {
   DRIVERS: {
     LIST: '/drivers',
   },
+  ACTIVITY_LOG: {
+    LIST: '/audit-trail',
+  },
 };

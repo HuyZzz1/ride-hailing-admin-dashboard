@@ -22,7 +22,7 @@ export default async function handler(
     }
 
     const newBooking = {
-      id: uuidv4().replace(/-/g, '').substring(0, 10),
+      id: uuidv4().split('-')[0],
       customer,
       formAddress,
       toAddress,

@@ -1,10 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { checkAuth } from '../../../service/auth';
 import dayjs from 'dayjs';
-import { diversData } from '@/utils/mockData';
 import { RideStatus } from '@/utils/enum';
-import { loadBookings } from '@/utils/db';
-import { BookingCollection } from '@/service/collection';
+import { loadBookings, loadDrivers } from '@/utils/db';
+import { BookingCollection, DriverCollection } from '@/service/collection';
 
 export type PaginationResponse<T> = {
   docs: T[];
@@ -31,93 +30,101 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const token = await checkAuth(req, res);
-  if (!token) return;
+  try {
+    const token = await checkAuth(req, res);
+    if (!token) return;
 
-  if (req.method === 'POST') {
-    const {
-      search = '',
-      filter = {},
-      sort,
-      page,
-      limit,
-    }: PaginationRequest = req.body;
+    if (req.method === 'POST') {
+      const {
+        search = '',
+        filter = {},
+        sort,
+        page,
+        limit,
+      }: PaginationRequest = req.body;
 
-    const currentPage = page ?? 1;
-    const currentLimit = limit ?? 18;
+      const currentPage = page ?? 1;
+      const currentLimit = limit ?? 18;
 
-    let filteredBookings = await loadBookings();
+      let filteredBookings = await loadBookings();
+      const diversData = await loadDrivers();
 
-    if (search) {
-      const searchLower = search.toLowerCase();
-      filteredBookings = filteredBookings.filter(
-        (b: BookingCollection) =>
-          b.id.toLowerCase().includes(searchLower) ||
-          b.customer.toLowerCase().includes(searchLower) ||
-          b?.driver?.toLowerCase().includes(searchLower)
+      if (search) {
+        const searchLower = search.toLowerCase();
+        filteredBookings = filteredBookings.filter(
+          (b: BookingCollection) =>
+            b.id.toLowerCase().includes(searchLower) ||
+            b.customer.toLowerCase().includes(searchLower) ||
+            b?.driver?.toLowerCase().includes(searchLower)
+        );
+      }
+
+      if (filter.status) {
+        filteredBookings = filteredBookings.filter(
+          (b: BookingCollection) => b.status === filter.status
+        );
+      }
+
+      if (filter.driverId) {
+        filteredBookings = filteredBookings.filter(
+          (b: BookingCollection) => b.driverId === filter.driverId
+        );
+      }
+
+      if (filter.startDate && filter.endDate) {
+        const start = dayjs(filter.startDate).startOf('day').toDate();
+        const end = dayjs(filter.endDate).endOf('day').toDate();
+
+        filteredBookings = filteredBookings.filter((b: BookingCollection) => {
+          const bookingTime = new Date(b.createdAt);
+          return bookingTime >= start && bookingTime <= end;
+        });
+      }
+
+      filteredBookings.sort((a: any, b: any) => {
+        const dateA = dayjs(a.createdAt);
+        const dateB = dayjs(b.createdAt);
+
+        if (sort?.field === 'createdAt' && sort.order === 'asc') {
+          return dateA.isBefore(dateB) ? -1 : 1;
+        }
+
+        return dateA.isBefore(dateB) ? 1 : -1;
+      });
+
+      const enrichedBookings = filteredBookings.map(
+        (booking: BookingCollection) => {
+          const driverInfo =
+            diversData.find(
+              (driver: DriverCollection) => driver.id === booking.driverId
+            )?.name || null;
+          return {
+            ...booking,
+            driver: driverInfo,
+          };
+        }
       );
-    }
 
-    if (filter.status) {
-      filteredBookings = filteredBookings.filter(
-        (b: BookingCollection) => b.status === filter.status
+      const totalDocs = enrichedBookings.length;
+      const totalPages = Math.ceil(totalDocs / currentLimit);
+      const paginatedBookings = enrichedBookings.slice(
+        (currentPage - 1) * currentLimit,
+        currentPage * currentLimit
       );
-    }
 
-    if (filter.driverId) {
-      filteredBookings = filteredBookings.filter(
-        (b: BookingCollection) => b.driverId === filter.driverId
-      );
-    }
-
-    if (filter.startDate && filter.endDate) {
-      const start = dayjs(filter.startDate).startOf('day').toDate();
-      const end = dayjs(filter.endDate).endOf('day').toDate();
-
-      filteredBookings = filteredBookings.filter((b: BookingCollection) => {
-        const bookingTime = new Date(b.createdAt);
-        return bookingTime >= start && bookingTime <= end;
+      return res.status(200).json({
+        docs: paginatedBookings,
+        totalDocs,
+        totalPages,
+        limit: currentLimit,
+        page: currentPage,
       });
     }
 
-    filteredBookings.sort((a: any, b: any) => {
-      const dateA = dayjs(a.createdAt);
-      const dateB = dayjs(b.createdAt);
-
-      if (sort?.field === 'createdAt' && sort.order === 'asc') {
-        return dateA.isBefore(dateB) ? -1 : 1;
-      }
-
-      return dateA.isBefore(dateB) ? 1 : -1;
-    });
-
-    const enrichedBookings = filteredBookings.map(
-      (booking: BookingCollection) => {
-        const driverInfo =
-          diversData.find((driver) => driver.id === booking.driverId)?.name ||
-          null;
-        return {
-          ...booking,
-          driver: driverInfo,
-        };
-      }
-    );
-
-    const totalDocs = enrichedBookings.length;
-    const totalPages = Math.ceil(totalDocs / currentLimit);
-    const paginatedBookings = enrichedBookings.slice(
-      (currentPage - 1) * currentLimit,
-      currentPage * currentLimit
-    );
-
-    return res.status(200).json({
-      docs: paginatedBookings,
-      totalDocs,
-      totalPages,
-      limit: currentLimit,
-      page: currentPage,
-    });
+    return res.status(405).json({ message: 'Method Not Allowed' });
+  } catch (error: any) {
+    return res
+      .status(500)
+      .json({ message: 'Internal Server Error', error: error.message });
   }
-
-  return res.status(405).json({ message: 'Method Not Allowed' });
 }
