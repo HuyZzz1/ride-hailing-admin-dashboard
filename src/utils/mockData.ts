@@ -1,9 +1,9 @@
 import {
-  BookingCollection,
+  AuditTrailCollection,
   DriverCollection,
   UserCollection,
 } from '@/service/collection';
-import { DriverStatus, RideStatus, Role } from './enum';
+import { DriverStatus, Role } from './enum';
 
 export const users: UserCollection[] = [
   {
@@ -22,55 +22,7 @@ export const users: UserCollection[] = [
   },
 ];
 
-export const bookings: BookingCollection[] = [
-  {
-    id: '1',
-    customer: 'Nguyễn Văn A',
-    formAddress: '4 Trịnh Đình Thảo, Hòa Thạnh, Tân Phú',
-    toAddress: '10 Trịnh Đình Thảo, Hòa Thạnh, Tân Phú',
-    driver: 'Trần Văn A',
-    status: RideStatus.PENDING,
-    createdAt: new Date('02-08-2025'),
-  },
-  {
-    id: '2',
-    customer: 'Nguyễn Văn B',
-    formAddress: '10 Trịnh Đình Thảo, Hòa Thạnh, Tân Phú',
-    toAddress: '20 Trịnh Đình Thảo, Hòa Thạnh, Tân Phú',
-    driver: 'Trần Văn B',
-    status: RideStatus.COMPLETED,
-    createdAt: new Date('02-07-2025'),
-  },
-  {
-    id: '3',
-    customer: 'Nguyễn Văn C',
-    formAddress: '10 Trịnh Đình Thảo, Hòa Thạnh, Tân Phú',
-    toAddress: '20 Trịnh Đình Thảo, Hòa Thạnh, Tân Phú',
-    driver: 'Trần Văn C',
-    status: RideStatus.IN_PROGRESS,
-    createdAt: new Date('02-05-2025'),
-  },
-  {
-    id: '4',
-    customer: 'Nguyễn Văn D',
-    formAddress: '10 Trịnh Đình Thảo, Hòa Thạnh, Tân Phú',
-    toAddress: '20 Trịnh Đình Thảo, Hòa Thạnh, Tân Phú',
-    driver: 'Trần Văn C',
-    status: RideStatus.IN_PROGRESS,
-    createdAt: new Date('02-05-2025'),
-  },
-  {
-    id: '5',
-    customer: 'Nguyễn Văn E',
-    formAddress: '10 Trịnh Đình Thảo, Hòa Thạnh, Tân Phú',
-    toAddress: '20 Trịnh Đình Thảo, Hòa Thạnh, Tân Phú',
-    driver: 'Trần Văn C',
-    status: RideStatus.IN_PROGRESS,
-    createdAt: new Date('02-05-2025'),
-  },
-];
-
-export const divers: DriverCollection[] = [
+export const diversData: DriverCollection[] = [
   {
     id: '1',
     name: 'Lê Văn A',
@@ -121,6 +73,35 @@ export const divers: DriverCollection[] = [
   },
   {
     id: '3',
+    name: 'Lê Văn D',
+    birthday: '25-01-2000',
+    phone: '0328087570',
+    address: '50 Trịnh Đình Trọng, Tân Phú, TP.HCM',
+    vehicle: 'Vario',
+    licensePlate: '77F1-777.27',
+    rating: 7.0,
+    completedRides: 15,
+    review: [
+      {
+        customer: 'Nguyễn Văn A',
+        title: 'Chạy xe an toàn, lịch sự',
+        rating: 5,
+      },
+      {
+        customer: 'Nguyễn Văn B',
+        title: 'Lịch sự',
+        rating: 4,
+      },
+      {
+        customer: 'Nguyễn Văn B',
+        title: 'Lịch sự',
+        rating: 4,
+      },
+    ],
+    status: DriverStatus.ACTIVE,
+  },
+  {
+    id: '4',
     name: 'Lê Văn C',
     birthday: '16-03-1999',
     phone: '0328022578',
@@ -139,3 +120,5 @@ export const divers: DriverCollection[] = [
     status: DriverStatus.DEACTIVATED,
   },
 ];
+
+export const auditTrail: AuditTrailCollection[] = [];

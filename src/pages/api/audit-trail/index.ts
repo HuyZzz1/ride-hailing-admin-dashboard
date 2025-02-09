@@ -1,7 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { checkAuth } from '../../../service/auth';
-
-const auditLogs = [];
+import { auditTrail } from '@/utils/mockData';
 
 export default async function handler(
   req: NextApiRequest,
@@ -10,11 +9,9 @@ export default async function handler(
   const token = await checkAuth(req, res);
   if (!token) return;
 
-  if (req.method === 'POST') {
-    const { user, action } = req.body;
-    auditLogs.unshift({ user, action, timestamp: new Date().toISOString() });
-    return res.status(201).json({ message: 'Logged successfully' });
+  if (req.method !== 'GET') {
+    return res.status(405).json({ message: 'Method Not Allowed' });
   }
 
-  return res.status(405).json({ message: 'Method Not Allowed' });
+  return res.status(200).json({ docs: auditTrail });
 }

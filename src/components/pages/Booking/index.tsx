@@ -1,6 +1,13 @@
-import { ShowErrorMessage } from '@/components/common/Message';
+import {
+  ShowErrorMessage,
+  ShowSuccessMessage,
+} from '@/components/common/Message';
 import Table from '@/components/storybook/Table';
-import { listBookingsQuery } from '@/service/api/bookings';
+import {
+  deleteBookingQuery,
+  deleteMultipleBookingQuery,
+  listBookingsQuery,
+} from '@/service/api/bookings';
 import { BookingCollection } from '@/service/collection';
 import { PaginationRequest, PaginationResponse } from '@/service/types';
 import { DEFAULT_FILTER, DEFAULT_RESPONSE } from '@/utils/constant';
@@ -12,6 +19,7 @@ import {
   DatePicker,
   Form,
   Input,
+  Modal,
   Row,
   Select,
   Space,
@@ -26,12 +34,20 @@ import { DeleteOutlined, EditOutlined, InfoOutlined } from '@ant-design/icons';
 import _debounce from 'lodash/debounce';
 import { RideStatus } from '@/utils/enum';
 import usePagination from '@/service/hooks/usePagination';
+import { useRecoilValue } from 'recoil';
+import { driversRecoil } from '@/service/recoil/drivers';
+import Create from './Modal/Create';
+import Edit from './Modal/Edit';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
+import ViewDetails from './Modal/ViewDetails';
+import { TableRowSelection } from 'antd/es/table/interface';
 
 const { RangePicker } = DatePicker;
 
 const Filter = () => {
   const [form] = Form.useForm();
   const router = useRouter();
+  const drivers = useRecoilValue(driversRecoil);
   const onChangeKeyWord = _debounce((e) => {
     const value = e.target.value.trim();
 
@@ -48,6 +64,7 @@ const Filter = () => {
     form.setFieldsValue({
       search: router.query?.search || '',
       status: router.query?.status || null,
+      driverId: router.query?.driverId || null,
       dateRange:
         router.query?.startDate && router.query?.endDate
           ? [
@@ -127,35 +144,21 @@ const Filter = () => {
             </Form.Item>
           </Col>
           <Col xs={24} md={12} lg={6}>
-            <Form.Item name='driver'>
+            <Form.Item name='driverId'>
               <Select
                 allowClear
                 className='w-full'
                 placeholder='Driver'
-                options={[
-                  {
-                    label: 'Pending',
-                    value: RideStatus.PENDING,
-                  },
-                  {
-                    label: 'Completed',
-                    value: RideStatus.COMPLETED,
-                  },
-                  {
-                    label: 'In Progress',
-                    value: RideStatus.IN_PROGRESS,
-                  },
-                  {
-                    label: 'Cancelled',
-                    value: RideStatus.CANCELLED,
-                  },
-                ]}
+                options={drivers.map((item) => ({
+                  label: item?.name,
+                  value: item?.id,
+                }))}
                 onChange={(value) => {
                   router.push({
                     pathname: router.pathname,
                     query: {
                       ...router.query,
-                      status: value,
+                      driverId: value,
                     },
                   });
                 }}
@@ -177,15 +180,31 @@ const Booking = () => {
   const [data, setData] =
     useState<PaginationResponse<BookingCollection>>(DEFAULT_RESPONSE);
   const { onChange } = usePagination();
+  const createRef = useRef<any>(null);
+  const editRef = useRef<any>(null);
+  const viewDetailsRef = useRef<any>(null);
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+  const hasSelected = selectedRowKeys.length > 0;
+
+  const { mutate: deleteMutate } = useMutation({
+    mutationFn: deleteBookingQuery,
+  });
+
+  const { mutate: deleteMultipleMutate, isPending: isPendingDeleteMultiple } =
+    useMutation({
+      mutationFn: deleteMultipleBookingQuery,
+    });
 
   const fetchData = () => {
-    const { page, search, status, startDate, endDate } = router.query as any;
+    const { page, search, status, driverId, startDate, endDate } =
+      router.query as any;
 
     query.current.filter = {};
     query.current.page = page ? Number(page) : 1;
     query.current.search = search;
 
     if (status) query.current.filter = { ...query.current.filter, status };
+    if (driverId) query.current.filter = { ...query.current.filter, driverId };
 
     if (startDate && endDate)
       query.current.filter = {
@@ -199,7 +218,31 @@ const Booking = () => {
         setData(data);
       },
       onError: (error: any) => {
-        ShowErrorMessage(error?.response);
+        ShowErrorMessage(error.statusText);
+      },
+    });
+  };
+
+  const onDelete = (id: string) => {
+    Modal.confirm({
+      title: 'Delete Booking',
+      content: 'Are you sure you want to delete',
+      icon: <ExclamationCircleOutlined />,
+      okText: 'Yes',
+      cancelText: 'No',
+      onOk: () => {
+        deleteMutate(
+          { id },
+          {
+            onSuccess: () => {
+              fetchData();
+              ShowSuccessMessage('deleteBooking');
+            },
+            onError: (error: any) => {
+              ShowErrorMessage(error.statusText);
+            },
+          }
+        );
       },
     });
   };
@@ -269,6 +312,7 @@ const Booking = () => {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    viewDetailsRef.current.open(item);
                   }}
                 >
                   <InfoOutlined />
@@ -281,6 +325,7 @@ const Booking = () => {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    editRef.current.open(item);
                   }}
                 >
                   <EditOutlined />
@@ -294,6 +339,7 @@ const Booking = () => {
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
+                    onDelete(item?.id);
                   }}
                 >
                   <DeleteOutlined />
@@ -306,36 +352,87 @@ const Booking = () => {
     ];
   }, []);
 
+  const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
+    setSelectedRowKeys(newSelectedRowKeys);
+  };
+
+  const rowSelection: TableRowSelection<any> = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+  };
+
+  const onDeleteMultiple = (ids: string[]) => {
+    Modal.confirm({
+      title: 'Delete Booking',
+      content: 'Are you sure you want to delete',
+      icon: <ExclamationCircleOutlined />,
+      okText: 'Yes',
+      cancelText: 'No',
+      onOk: () => {
+        deleteMultipleMutate(
+          { ids },
+          {
+            onSuccess: () => {
+              fetchData();
+              setSelectedRowKeys([]);
+              ShowSuccessMessage('deleteBooking');
+            },
+            onError: (error: any) => {
+              ShowErrorMessage(error.statusText);
+            },
+          }
+        );
+      },
+    });
+  };
+
   useEffect(() => {
     fetchData();
   }, [router.query]);
 
   return (
-    <div className='flex flex-col'>
-      <div className='w-full h-[60px] bg-white flex items-center px-5'>
-        <p className='text-lg font-medium'>Booking Management</p>
+    <>
+      <Create ref={createRef} />
+      <Edit ref={editRef} fetchData={fetchData} />
+      <ViewDetails ref={viewDetailsRef} />
+      <div className='flex flex-col'>
+        <div className='w-full h-[60px] bg-white flex items-center px-5'>
+          <p className='text-lg font-medium'>Booking Management</p>
+        </div>
+        <div className='p-3'>
+          <Card>
+            <Filter />
+            <div className='flex items-center justify-between mb-5'>
+              <Button
+                type='primary'
+                danger
+                onClick={() => onDeleteMultiple(selectedRowKeys as string[])}
+                disabled={!hasSelected}
+                loading={isPendingDeleteMultiple}
+              >
+                Delete Multiple
+              </Button>
+              <Button type='primary' onClick={() => createRef.current.open()}>
+                Create
+              </Button>
+            </div>
+            <Table
+              isLoading={isPending}
+              columns={columns}
+              dataSource={data.docs.map((a) => ({ ...a, key: a.id }))}
+              onChange={onChange}
+              pagination={{
+                pageSize: data.limit,
+                position: ['bottomCenter'],
+                total: data.totalDocs,
+                current: data.page,
+              }}
+              rowSelection={rowSelection}
+            />
+          </Card>
+        </div>
       </div>
-      <div className='p-3'>
-        <Card>
-          <Filter />
-          <div className='flex items-center justify-end mb-5'>
-            <Button type='primary'>Create</Button>
-          </div>
-          <Table
-            isLoading={isPending}
-            columns={columns}
-            dataSource={data.docs}
-            onChange={onChange}
-            pagination={{
-              pageSize: data.limit,
-              position: ['bottomCenter'],
-              total: data.totalDocs,
-              current: data.page,
-            }}
-          />
-        </Card>
-      </div>
-    </div>
+    </>
   );
 };
 

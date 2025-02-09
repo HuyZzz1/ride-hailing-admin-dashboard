@@ -1,4 +1,4 @@
-import { DriverStatus, RideStatus, Role } from '@/utils/enum';
+import { ActionAudit, DriverStatus, RideStatus, Role } from '@/utils/enum';
 
 export type UserCollection = {
   id: string;
@@ -13,7 +13,8 @@ export type BookingCollection = {
   customer: string;
   formAddress: string;
   toAddress: string;
-  driver: string;
+  driver?: string;
+  driverId?: string;
   status: RideStatus;
   createdAt: Date;
 };
@@ -34,4 +35,13 @@ export type DriverCollection = {
     rating: number;
   }[];
   status: DriverStatus;
+};
+
+export type AuditTrailCollection = {
+  id: string;
+  action: ActionAudit;
+  user: string;
+  bookingId: string;
+  createdAt: Date;
+  details: string;
 };

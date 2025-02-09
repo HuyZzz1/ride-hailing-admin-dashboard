@@ -1,5 +1,5 @@
 import LoaderComponent from '@/components/common/LoaderComponent';
-import { Table } from 'antd';
+import { Empty, Table } from 'antd';
 
 type Props = {
   pagination?: any;
@@ -30,8 +30,8 @@ const CustomTable: React.FC<Props> = ({
             <LoaderComponent />
           </div>
         ) : (
-          <div className='text-center py-5'>
-            <p>No data</p>
+          <div className='py-5'>
+            <Empty />
           </div>
         ),
       }}

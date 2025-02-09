@@ -9,14 +9,24 @@ import {
   UN_LAYOUT_ROUTES,
 } from '@/utils/routes';
 import { userRecoil } from '@/service/recoil/user';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 import Layout from './Layout';
 import LoaderComponent from './LoaderComponent';
+import { driversRecoil } from '@/service/recoil/drivers';
+import { listDriversQuery } from '@/service/api/drivers';
+import { DEFAULT_FILTER } from '@/utils/constant';
+import { ShowErrorMessage } from './Message';
+import { DriverStatus } from '@/utils/enum';
+import { DriverCollection } from '@/service/collection';
 
 const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const router = useRouter();
   const { mutate: profileMutate } = useMutation({ mutationFn: profileQuery });
+  const { mutate: driversMutate } = useMutation({
+    mutationFn: listDriversQuery,
+  });
   const [user, setUser] = useRecoilState(userRecoil);
+  const setDrivers = useSetRecoilState(driversRecoil);
 
   const onGetProfile = () => {
     profileMutate({} as any, {
@@ -36,9 +46,34 @@ const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     });
   };
 
+  const onGetDrivers = () => {
+    driversMutate(
+      {
+        ...DEFAULT_FILTER,
+        filter: {
+          status: DriverStatus.ACTIVE,
+        },
+      } as any,
+      {
+        onSuccess: ({ data }) => {
+          setDrivers(
+            data.docs.map((a: DriverCollection) => ({
+              id: a?.id,
+              name: a?.name,
+            }))
+          );
+        },
+        onError: (error: any) => {
+          ShowErrorMessage(error?.response);
+        },
+      }
+    );
+  };
+
   useEffect(() => {
     if (!UN_FETCH_PROFILE_ROUTES.includes(router.pathname)) {
       onGetProfile();
+      onGetDrivers();
     } else {
       setUser((prev) => ({ ...prev, isLoading: false }));
     }

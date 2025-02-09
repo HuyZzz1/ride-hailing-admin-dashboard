@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { checkAuth } from '../../../service/auth';
-import { divers } from '@/utils/mockData';
+import { diversData } from '@/utils/mockData';
 import { DriverStatus } from '@/utils/enum';
 
 export type PaginationResponse<T> = {
@@ -39,7 +39,7 @@ export default async function handler(
     const currentPage = page ?? 1;
     const currentLimit = limit ?? 18;
 
-    let filteredDivers = [...divers];
+    let filteredDivers = [...diversData];
 
     if (search) {
       const searchLower = search.toLowerCase();
@@ -65,7 +65,7 @@ export default async function handler(
       totalPages,
       limit: currentLimit,
       page: currentPage,
-    } as PaginationResponse<(typeof divers)[0]>);
+    } as PaginationResponse<(typeof diversData)[0]>);
   }
 
   return res.status(405).json({ message: 'Method Not Allowed' });

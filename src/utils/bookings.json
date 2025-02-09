@@ -1,0 +1,13 @@
+{
+  "bookings": [
+    {
+      "id": "ad3a3e2e4a",
+      "customer": "HUY_2",
+      "formAddress": "10 2Trịnh Đình Thảo",
+      "toAddress": "20 Trịnh Đình Thảo",
+      "driverId": "2",
+      "status": "PENDING",
+      "createdAt": "2025-02-09T13:20:50.841Z"
+    }
+  ]
+}
