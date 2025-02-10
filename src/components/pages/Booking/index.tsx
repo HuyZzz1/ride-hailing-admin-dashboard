@@ -463,7 +463,7 @@ const Booking = () => {
 
   useEffect(() => {
     fetchData();
-  }, [router.query]);
+  }, [router.query, user]);
 
   return (
     <>
