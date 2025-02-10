@@ -83,11 +83,11 @@ Visit (http://localhost:3000) to view the project.
 - `POST /api/bookings/create` - Create a new booking
 - `PUT /api/bookings/edit` - Update booking details
 - `POST /api/bookings/delete` - Delete a booking
-- `POST /api/bookings/delete-multiple` - Delete Multiple bookings
+- `POST /api/bookings/delete-multiple` - Delete multiple bookings
 
 ### Drivers API
 
-- `POST /api/drivers` - Retrieve all bookings
+- `POST /api/drivers` - Retrieve all drivers
 
 ### Activity Log API
 
