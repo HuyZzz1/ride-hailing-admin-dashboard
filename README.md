@@ -92,3 +92,21 @@ Visit (http://localhost:3000) to view the project.
 ### Activity Log API
 
 - `POST /api/audit-trail` - Retrieve all activity log
+
+## Testing
+
+### Test Setup
+
+This project uses Jest, React Testing Library, and Supertest for unit and integration testing.
+
+To run tests, use:
+yarn test
+
+# or
+
+npm test
+🔹 Test Coverage
+
+- Unit Tests
+- Integration Tests
+- Role-Based Access Control (RBAC) Tests:
