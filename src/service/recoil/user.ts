@@ -7,7 +7,7 @@ type UserState = {
   id: string;
   email: string;
   name: string;
-  role: Role;
+  role?: Role;
 };
 
 export const DEFAULT_USER_RECOIL_STATE = {
@@ -16,7 +16,6 @@ export const DEFAULT_USER_RECOIL_STATE = {
   id: '',
   email: '',
   name: '',
-  role: Role.ADMIN,
 };
 
 export const userRecoil = atom<UserState>({
