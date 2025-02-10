@@ -345,7 +345,7 @@ const Booking = () => {
                   <EditOutlined />
                 </Button>
               </Tooltip>
-              {user?.role && user.role === Role.ADMIN && (
+              {user?.role === Role.ADMIN && (
                 <Tooltip title='Delete'>
                   <Button
                     size='small'
@@ -366,7 +366,7 @@ const Booking = () => {
         },
       },
     ];
-  }, []);
+  }, [user.role]);
 
   const onSelectChange = (newSelectedRowKeys: React.Key[]) => {
     setSelectedRowKeys(newSelectedRowKeys);
@@ -463,7 +463,7 @@ const Booking = () => {
 
   useEffect(() => {
     fetchData();
-  }, [router.query, user]);
+  }, [router.query]);
 
   return (
     <>
