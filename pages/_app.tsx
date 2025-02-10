@@ -17,7 +17,6 @@ export const poppins = Poppins({
   variable: '--font-poppins',
 });
 
-/* @typescript-eslint/no-empty-object-type */
 export type NextPageWithLayout<P = any, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
 };

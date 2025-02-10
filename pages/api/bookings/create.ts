@@ -15,8 +15,6 @@ export default async function handler(
   if (req.method === 'POST') {
     const bookings = await loadBookings();
 
-    console.log('bookings:', bookings);
-
     const { customer, formAddress, toAddress, driverId, status } = req.body;
 
     if (!customer || !formAddress || !toAddress || !driverId || !status) {
@@ -35,7 +33,6 @@ export default async function handler(
 
     bookings.push(newBooking);
     await saveBookings(bookings);
-    console.log('Booking saved successfully');
 
     logAudit(
       ActionAudit.CREATE,

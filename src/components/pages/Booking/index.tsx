@@ -199,6 +199,7 @@ const Booking = () => {
     ...DEFAULT_FILTER,
     limit: 9999,
   });
+  const [isLoadingExport, setIsLoadingExport] = useState(false);
 
   const { mutate: deleteMutate } = useMutation({
     mutationFn: deleteBookingQuery,
@@ -403,6 +404,7 @@ const Booking = () => {
   };
 
   const onExport = () => {
+    setIsLoadingExport(true);
     const { page, search, status, driverId, startDate, endDate } =
       router.query as any;
 
@@ -426,7 +428,6 @@ const Booking = () => {
       onSuccess: ({ data }) => {
         const worksheet = XLSX.utils.json_to_sheet(
           data?.docs?.map((item: BookingCollection) => {
-            console.log('item', item);
             let status = '';
 
             if (item?.status === RideStatus.PENDING) {
@@ -454,9 +455,11 @@ const Booking = () => {
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
         XLSX.writeFile(workbook, `Booking Management.xlsx`);
+        setIsLoadingExport(false);
       },
       onError: (error: any) => {
         ShowErrorMessage(error.statusText);
+        setIsLoadingExport(false);
       },
     });
   };
@@ -513,6 +516,7 @@ const Booking = () => {
                     type='primary'
                     onClick={onExport}
                     className='sm:w-full'
+                    loading={isLoadingExport}
                   >
                     <div className='flex items-center justify-center gap-2.5'>
                       <DownloadOutlined

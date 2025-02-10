@@ -24,7 +24,7 @@ const Edit: ForwardRefRenderFunction<
   {
     fetchData: () => void;
   }
-> = ({ fetchData }: any, ref) => {
+> = ({ fetchData }, ref) => {
   const [form] = useForm();
   const [state, steState] = useState<{
     open: boolean;
