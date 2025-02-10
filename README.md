@@ -60,10 +60,10 @@ yarn dev
 npm run dev
 ```
 
-###  Account
+### Account
 
-Admin: email:admin@gmail.com  password:123123
-Account Staff: email:staff@gmail.com  password:123123
+Admin: email:admin@gmail.com - password:123123
+Account Staff: email:staff@gmail.com - password:123123
 
 Visit (http://localhost:3000) to view the project.
 
