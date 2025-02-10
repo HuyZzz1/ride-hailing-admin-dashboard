@@ -97,14 +97,11 @@ Visit (http://localhost:3000) to view the project.
 
 ### Test Setup
 
-This project uses Jest, React Testing Library, and Supertest for unit and integration testing.
+This project uses Jest, React Testing Library, for unit and integration testing.
 
 To run tests, use:
 yarn test
 
-# or
-
-npm test
 🔹 Test Coverage
 
 - Unit Tests
