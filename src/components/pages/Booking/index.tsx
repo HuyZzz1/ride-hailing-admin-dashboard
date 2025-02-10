@@ -200,8 +200,6 @@ const Booking = () => {
     limit: 9999,
   });
 
-  console.log('user?.role', user?.role);
-
   const { mutate: deleteMutate } = useMutation({
     mutationFn: deleteBookingQuery,
   });
@@ -347,7 +345,7 @@ const Booking = () => {
                   <EditOutlined />
                 </Button>
               </Tooltip>
-              {user?.role !== Role.STAFF && (
+              {user?.role && user.role === Role.ADMIN && (
                 <Tooltip title='Delete'>
                   <Button
                     size='small'
